@@ -65,6 +65,18 @@
 			margin: 10px 5px;
 			padding: 5px 5px;
 		}
+		.online {
+			background-color: green;
+		}
+		.offline {
+			background-color: grey;
+		}
+		.appeared {
+			background-color: orange;
+		}
+		.left {
+			background-color: pink;
+		}
 		#messages {
 			grid-area: main;
 			padding: 10px;
@@ -170,7 +182,8 @@
 					nickName = nick.value;
 					var data = {
 						userName: userName,
-						nickName: nickName
+						nickName: nickName,
+						userState: 'online'
 					}
 					socket.emit('chat users', data);
 				});
@@ -197,7 +210,16 @@
 					if(msg.length > 0) {
 						for(let i in msg) {
 							var el = document.createElement('li');
-							el.innerHTML = '<i>' + msg[i].userName + ' </i><b> @' + msg[i].nickName + '</b>';
+							el.innerHTML = '<i>' + msg[i].userName + ' </i><b> @' + msg[i].nickName + '</b><br>';
+							if(msg[i].userState === 'online') {
+								el.innerHTML += '<span class="online">online</span>';
+							} else if(msg[i].userState === 'offline') {
+								el.innerHTML += '<span class="offline">offline</span>';
+							} else if(msg[i].userState === 'just appeared') {
+								el.innerHTML += '<span class="appeared">just appeared</span>';
+							} else {
+								el.innerHTML += '<span class="left">just left</span>';
+							}
 							usersList.appendChild(el);
 						}
 					}
@@ -205,7 +227,6 @@
 				socket.on('exception', function(msg) {
 					errMessage.innerText = "Nickname is already used! Please choose another one."; // JSON.parse(msg).error;
 				});
-
 				socket.on('chat message', function(msg) {
 					messages.innerHTML = '';
 					let side = "left-aligned";

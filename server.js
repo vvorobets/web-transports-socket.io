@@ -15,8 +15,10 @@ app.get('/script.js', function(req, res){
 
 io.on('connection', function(socket) {
 	console.log('Client connected');
+	var userInfo;
 
 	socket.on('chat users', function(msg) {
+		userInfo = msg;
 		if(checkNickname(msg)) {
 			nickNames.push(msg);
 			io.emit('chat users', nickNames);
@@ -29,6 +31,18 @@ io.on('connection', function(socket) {
 		messages.push(msg);
 		io.emit('chat message', messages);
 	});
+
+	socket.on('disconnect', function(msg){
+		console.log("Disconnect!");
+		console.log(userInfo);
+		let n = findIndexOfUser(nickNames, userInfo);
+		if(n>=0){
+console.log(nickNames[n].userName);
+			nickNames[n].userState = 'offline';
+		}
+		
+		io.sockets.emit('chat users', nickNames);
+	});
 });
 
 function checkNickname(msg) {
@@ -39,7 +53,15 @@ function checkNickname(msg) {
 		}
 	});
 	return isValid;
-}
+};
+function findIndexOfUser(nickNames, userInfo){
+	for(let i = 0, l = nickNames.length; i < l; i++) {
+		if(Object.is(nickNames[i].nickName, userInfo.nickName) === true) {
+			return i;
+		}
+	};
+	return -1;
+};
 
 http.listen(5000, function(){
 	console.log('listening on *:5000');
