@@ -15,21 +15,38 @@ app.get('/script.js', function(req, res){
 
 io.on('connection', function(socket) {
 	console.log('Client connected');
-	let userInfo;
+	var id = -1;
 
 	socket.on('chat users', function(msg) {
-		userInfo = msg;
+// 		userInfo = Object.assign({}, msg);
+// console.log(userInfo);
+
+		function checkNickname(msg) {
+			let isValid = true;
+			nickNames.forEach(el=>{
+				if(Object.is(msg.nickName && msg.nickName, el.nickName)) {
+					isValid = false;
+				}
+			});
+			return isValid;
+		};
+
 		if(checkNickname(msg)) {
+			id = nickNames.length;
 			nickNames.push(msg);
 			io.emit('chat users', nickNames);
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
 		}
 		setInterval(function(){
-			let l = nickNames.length;
-			nickNames[(l - 1)].userState = 'online';
+			if(id>=0) nickNames[id].userState = 'online';
 			io.sockets.emit('chat users', nickNames);
 		}, 60000);
+	});
+
+	socket.on('chat oninput', function(msg){
+		let notation = `@${msg} is typing …`;
+		io.emit('chat oninput', notation);
 	});
 	
 	socket.on('chat message', function(msg) {
@@ -38,37 +55,16 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function(msg){
-		let n = findIndexOfUser(nickNames, userInfo);
-		if(n>=0){
-			nickNames[n].userState = 'just left';
+		if(id>=0){
+			nickNames[id].userState = 'just left';
 			io.sockets.emit('chat users', nickNames);
 		}
 		setInterval(function(){
-			nickNames[n].userState = 'offline';
+			nickNames[id].userState = 'offline';
 			io.sockets.emit('chat users', nickNames);
 		}, 60000);
-		
-		
 	});
 });
-
-function checkNickname(msg) {
-	let isValid = true;
-	nickNames.forEach(el=>{
-		if(Object.is(msg.nickName, el.nickName)) {
-			isValid = false;
-		}
-	});
-	return isValid;
-};
-function findIndexOfUser(nickNames, userInfo){
-	for(let i = 0, l = nickNames.length; i < l; i++) {
-		if(Object.is(nickNames[i].nickName, userInfo.nickName) === true) {
-			return i;
-		}
-	};
-	return -1;
-};
 
 http.listen(5000, function(){
 	console.log('listening on *:5000');

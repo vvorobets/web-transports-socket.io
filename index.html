@@ -167,9 +167,10 @@
 				const usersList = document.getElementById('usersList');
 				const chat = document.getElementById('chat');
 
-				var messages = document.getElementById('messages');
-				var text = document.getElementById('text');
-				var textSubmit = document.getElementById('textSubmit');
+				const messages = document.getElementById('messages');
+				const text = document.getElementById('text');
+				const textSubmit = document.getElementById('textSubmit');
+				const sendMessage = document.getElementById('sendMessage');
 
 				let userName = '';
 				let nickName = '';
@@ -201,6 +202,11 @@
 					socket.emit('chat message', data);
 				});
 
+				text.addEventListener('input', function(e) {
+					e.preventDefault();
+					socket.emit('chat oninput', nickName);
+				});
+
 				socket.on('chat users', function(msg) {
 					errMessage.innerText = '';
 					chatEnter.style.display = "none";
@@ -209,7 +215,7 @@
 					usersList.innerHTML = '';
 					if(msg.length > 0) {
 						for(let i in msg) {
-							var el = document.createElement('li');
+							let el = document.createElement('li');
 							el.innerHTML = '<i>' + msg[i].userName + ' </i><b> @' + msg[i].nickName + '</b><br>';
 							if(msg[i].userState === 'online') {
 								el.innerHTML += '<span class="online">online</span>';
@@ -224,9 +230,18 @@
 						}
 					}
 				});
+
 				socket.on('exception', function(msg) {
 					errMessage.innerText = "Nickname is already used! Please choose another one."; // JSON.parse(msg).error;
 				});
+
+				socket.on('chat oninput', function(msg) {
+					let el = document.createElement('p');
+					el.innerText = msg;
+					el.setAttribute('class', 'oninput-notification');
+					sendMessage.appendChild(el);	
+				});
+
 				socket.on('chat message', function(msg) {
 					messages.innerHTML = '';
 					let side = "left-aligned";
