@@ -2,56 +2,225 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>AJAX Polling chat</title>
+		<title>Socket.io chat</title>
 		<style>
-			body {
-			    font-family: Arial, Helvetica, sans-serif;
-			}
-			form {
-			    border: 3px solid #f1f1f1;
-			}
-			input[type=text] {
-			    padding: 12px 20px;
-			    margin: 8px 0;
-			    display: inline-block;
-			    width: 100%;
-			    border: 1px solid #ccc;
-			    box-sizing: border-box;
-			}
-			button {
-			    background-color: #4CAF50;
-			    color: white;
-			    padding: 12px 20px;
-			    margin: 8px 0;
-			    border: none;
-			    cursor: pointer;
-			    width: 100%;
-			}
-			button:hover {
-			    opacity: 0.8;
-			}
-			h3 {
-			    background-color: #999999;
-			    color: white;
-			    padding: 12px 20px;
-			}
-			.enterContainer {
-			    padding: 16px;
-			}
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+		}
+		form {
+			border: 3px solid #f1f1f1;
+		}
+		input[type=text] {
+			padding: 12px 20px;
+			margin: 8px 0;
+			display: inline-block;
+			width: 100%;
+			border: 1px solid #ccc;
+			box-sizing: border-box;
+		}
+		button {
+			background-color: #4CAF50;
+			color: black;
+			padding: 12px 20px;
+			margin: 8px 0;
+			border: none;
+			cursor: pointer;
+			width: 100%;
+		}
+		button:hover {
+			opacity: 0.8;
+		}
+		h3 {
+			background-color: #333333;
+			color: white;
+			padding: 12px 20px;
+			margin: 0;
+		}
+		.enterContainer {
+			padding: 16px;
+			background-color: #AAAAAA;
+		}
+		#errorMessage {
+			color: red;
+			font-weight: bold;
+			width: 90vw;
+			text-align: center;
+		}
+		#chat h3 {
+			grid-area: header;
+		}
+		#usersList {
+			grid-area: aside;
+			background-color: #333333;
+			font-weight: bold;
+			padding: 5px;
+			align-self: stretch;
+			margin: 0;
+		}
+		#usersList li {
+			list-style-type: none;
+			border-radius: 5px;
+			background-color: white;
+			color: black;
+			margin: 10px 5px;
+			padding: 5px 5px;
+		}
+		#messages {
+			grid-area: main;
+			padding: 10px;
+		}
+		#messages li {
+			list-style-type: none;
+			border-radius: 5px;
+			background-color: white;
+			color: black;
+			margin: 10px 5px;
+			padding: 5px 5px;
+		}
+		.left-aligned {
+			text-align: left;
+		}
+		.right-aligned {
+			text-align: right;
+		}
+		#messages li small {
+			color:#AAA;
+			margin-left: auto;
+		}
+		#sendMessage {
+			grid-area: send;
+		}
+		#text {
+			padding: 12px 20px;
+			display: inline-block;
+			width: 80%;
+			border: 1px solid #ccc;
+			box-sizing: border-box;
+		}
+		#textSubmit {
+			background-color: #4CAF50;
+			color: white;
+			font-weight: bold;
+			padding: 12px 0;
+			border: 1px solid #ccc;
+			cursor: pointer;
+			width: 18%;
+		}
+		#chat {
+			width: 100%;
+			display: grid;
+			grid-template-columns: 20vw 1fr;
+			grid-template-rows: auto;
+			grid-template-areas: 
+				"header header"
+				"aside main"
+				"send send";
+			grid-gap: 5px;
+			background-color: #AAAAAA;
+		}
 		</style>
 	</head>
 	<body>
-		<h3 id="userHeader"></h3>
-		<div>
-			<input type="text" placeholder="Your name" id="nameInput">
-			<input type="button" value="OK" id="nameButton">
+		<div class="app">
+			<form id="chatEnter">
+				<h3>Enter to the Chat</h3>
+				<div class="enterContainer">
+				<label for="uname"><b>Username</b></label>
+				<input type="text" placeholder="Enter Username" id="uname" required>
+				<label for="nick"><b>Nickname</b></label>
+				<input type="text" placeholder="Enter Nickname" id="nick" required>
+				<button type="submit" id="enterButton"><b>OK</b></button>
+				<p id="errorMessage"></p>
+				</div>
+			</form>
+			<div id="chat" style="display: none">
+				<h3>Chat</h3>
+				<ul id="usersList"></ul>
+				<ul id="messages"></ul>
+				<form id="sendMessage">
+					<input type="text" placeholder="Enter Message" id="text" required>
+					<input type="submit" id="textSubmit" value="Send">
+				</form> 
+			</div>
 		</div>
-		<ul id="messages"></ul>
-		<div>
-			<textarea id="text" cols="30" rows="10"></textarea>
-			<input type="button" value="Send" id="textSubmit">
-		</div>
-		<script src="/socket.io/socket.io.js"></script>
-		<script src="script.js"></script>
+				<script src="socket.io/socket.io.js"></script>
+		<!-- <script type="text/javascript" src="script.js"></script>  -->
+		<script>
+			(function(){
+				const chatEnter = document.getElementById('chatEnter');
+				const uname = document.getElementById('uname');
+				const nick = document.getElementById('nick');
+				const enterButton = document.getElementById('enterButton');
+				const errMessage = document.getElementById('errorMessage');
+				const usersList = document.getElementById('usersList');
+				const chat = document.getElementById('chat');
+
+				var messages = document.getElementById('messages');
+				var text = document.getElementById('text');
+				var textSubmit = document.getElementById('textSubmit');
+
+				let userName = '';
+				let nickName = '';
+
+				var socket = io.connect();
+
+					enterButton.addEventListener('click', function(e) {
+					e.preventDefault();
+					userName = uname.value;
+					nickName = nick.value;
+					var data = {
+						userName: userName,
+						nickName: nickName
+					}
+					socket.emit('chat users', data);
+				});
+
+				textSubmit.addEventListener('click', function(e) {
+					e.preventDefault();
+					let time = new Date();
+					var data = {
+						nickName: nickName,
+						text: text.value,
+						time: time.toUTCString()
+					};
+					text.value = '';
+
+					socket.emit('chat message', data);
+				});
+
+				socket.on('chat users', function(msg) {
+					errMessage.innerText = '';
+		chatEnter.style.display = "none";
+		chat.style.display = "grid";
+				});
+				socket.on('exception', function(msg) {
+					errMessage.innerText = "Nickname is already used! Please choose another one."; // JSON.parse(msg).error;
+				});
+
+				socket.on('chat history', function(msg) {
+					messages.innerHTML = '';
+					let side = "left-aligned";
+					for(let i in msg) {
+						if(msg.hasOwnProperty(i)) {
+							var el = document.createElement('li');
+							el.setAttribute('class', side);
+							side = side === 'left-aligned' ? 'right-aligned' : 'left-aligned';
+							el.innerHTML = '<span>' + msg[i].nickName + ' <small><i>' + msg[i].time + '</i></small></span><br><p>' + 
+							msg[i].text + '</p>';
+							messages.appendChild(el);
+						}
+					}
+				});
+
+				socket.on('chat message', function(msg) {
+					var el = document.createElement('li');
+					el.innerHTML = '<span>' + msg.nickName + ' <small><i>' + msg.time + '</i></small></span><br><p>' + 
+							msg.text + '</p>';
+					messages.appendChild(el);
+				});
+
+			})();
+		
+		</script>
 	</body>
 </html>
