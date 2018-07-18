@@ -18,9 +18,6 @@ io.on('connection', function(socket) {
 	var id = -1;
 
 	socket.on('chat users', function(msg) {
-// 		userInfo = Object.assign({}, msg);
-// console.log(userInfo);
-
 		function checkNickname(msg) {
 			let isValid = true;
 			nickNames.forEach(el=>{
@@ -36,8 +33,6 @@ io.on('connection', function(socket) {
 			nickNames.push(msg);
 			nickNames[id].id = id;
 			nickNames[id].socketId = socket.id;
-console.log(socket.id);
-console.log(nickNames[id]);
 			// sending existing messages to the new user
 			socket.emit('chat message', messages);
 			io.emit('chat users', nickNames);
@@ -68,6 +63,9 @@ console.log(nickNames[id]);
 	
 	socket.on('chat message', function(msg) {
 		messages.push(msg);
+		if(messages.length > 100) {
+			messages.shift();
+		};
 		io.emit('chat message', messages);
 	});
 
