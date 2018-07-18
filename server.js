@@ -35,6 +35,9 @@ io.on('connection', function(socket) {
 			id = nickNames.length;
 			nickNames.push(msg);
 			nickNames[id].id = id;
+
+			// sending existing messages to the new user
+			socket.emit('chat message', messages);
 			io.emit('chat users', nickNames);
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
