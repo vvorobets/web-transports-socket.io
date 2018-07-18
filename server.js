@@ -35,7 +35,9 @@ io.on('connection', function(socket) {
 			id = nickNames.length;
 			nickNames.push(msg);
 			nickNames[id].id = id;
-
+			nickNames[id].socketId = socket.id;
+console.log(socket.id);
+console.log(nickNames[id]);
 			// sending existing messages to the new user
 			socket.emit('chat message', messages);
 			io.emit('chat users', nickNames);
@@ -53,13 +55,14 @@ io.on('connection', function(socket) {
 		io.emit('chat oninput', notation);
 		
 		if(Object.is('@', msg.text[0])) {
-			const receiver = nickNames.filter(user=>{
+			nickNames.forEach(user=>{
+
 				let test = msg.text.slice(1, user.nickName.length + 1);
 				if(Object.is(test, user.nickName)) {
-					return user;
+					socket.broadcast.to(user.socketId).emit('chat direct', msg);
+					return;
 				}
 			});
-			socket.emit('chat direct', msg);
 		}
 	});
 	
