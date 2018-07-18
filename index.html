@@ -120,6 +120,7 @@
 		}
 		#notification {
 			grid-area: notification;
+			padding: 12px 20px;
 		}
 		#chat {
 			width: 100%;
@@ -197,7 +198,7 @@
 				textSubmit.addEventListener('click', function(e) {
 					e.preventDefault();
 					let time = new Date();
-					var data = {
+					const data = {
 						nickName: nickName,
 						text: text.value,
 						time: time.toUTCString()
@@ -209,7 +210,11 @@
 
 				text.addEventListener('input', function(e) {
 					e.preventDefault();
-					socket.emit('chat oninput', nickName);
+					const data = {
+						nickName: nickName,
+						text: e.target.value,
+					}
+					socket.emit('chat oninput', data);
 				});
 
 				socket.on('chat users', function(msg) {
@@ -242,6 +247,10 @@
 
 				socket.on('chat oninput', function(msg) {
 					notification.innerText = msg;
+				});
+
+				socket.on('chat direct', function(msg) {
+					notification.style.backgroundColor = 'orange';
 				});
 
 				socket.on('chat message', function(msg) {

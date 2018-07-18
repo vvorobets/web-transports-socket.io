@@ -34,6 +34,7 @@ io.on('connection', function(socket) {
 		if(checkNickname(msg)) {
 			id = nickNames.length;
 			nickNames.push(msg);
+			nickNames[id].id = id;
 			io.emit('chat users', nickNames);
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
@@ -45,8 +46,18 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('chat oninput', function(msg){
-		let notation = `@${msg} is typing …`;
+		let notation = `@${msg.nickName} is typing …`;
 		io.emit('chat oninput', notation);
+		
+		if(Object.is('@', msg.text[0])) {
+			const receiver = nickNames.filter(user=>{
+				let test = msg.text.slice(1, user.nickName.length + 1);
+				if(Object.is(test, user.nickName)) {
+					return user;
+				}
+			});
+			socket.emit('chat direct', msg);
+		}
 	});
 	
 	socket.on('chat message', function(msg) {
