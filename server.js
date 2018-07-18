@@ -58,11 +58,12 @@ io.on('connection', function(socket) {
 		if(id>=0){
 			nickNames[id].userState = 'just left';
 			io.sockets.emit('chat users', nickNames);
+		
+			setInterval(function(){
+				nickNames[id].userState = 'offline';
+				io.sockets.emit('chat users', nickNames);
+			}, 60000);
 		}
-		setInterval(function(){
-			nickNames[id].userState = 'offline';
-			io.sockets.emit('chat users', nickNames);
-		}, 60000);
 	});
 });
 

@@ -118,6 +118,9 @@
 			cursor: pointer;
 			width: 18%;
 		}
+		#notification {
+			grid-area: notification;
+		}
 		#chat {
 			width: 100%;
 			display: grid;
@@ -126,7 +129,8 @@
 			grid-template-areas: 
 				"header header"
 				"aside main"
-				"send send";
+				"send send"
+				"notification notification";
 			grid-gap: 5px;
 			background-color: #AAAAAA;
 		}
@@ -152,7 +156,8 @@
 				<form id="sendMessage">
 					<input type="text" placeholder="Enter Message" id="text" required>
 					<input type="submit" id="textSubmit" value="Send">
-				</form> 
+				</form>
+				<p id="notification"></p> 
 			</div>
 		</div>
 				<script src="socket.io/socket.io.js"></script>
@@ -170,7 +175,7 @@
 				const messages = document.getElementById('messages');
 				const text = document.getElementById('text');
 				const textSubmit = document.getElementById('textSubmit');
-				const sendMessage = document.getElementById('sendMessage');
+				const notification = document.getElementById('notification');
 
 				let userName = '';
 				let nickName = '';
@@ -236,10 +241,7 @@
 				});
 
 				socket.on('chat oninput', function(msg) {
-					let el = document.createElement('p');
-					el.innerText = msg;
-					el.setAttribute('class', 'oninput-notification');
-					sendMessage.appendChild(el);	
+					notification.innerText = msg;
 				});
 
 				socket.on('chat message', function(msg) {
