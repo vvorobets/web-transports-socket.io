@@ -206,7 +206,7 @@
 					errMessage.innerText = "Nickname is already used! Please choose another one."; // JSON.parse(msg).error;
 				});
 
-				socket.on('chat history', function(msg) {
+				socket.on('chat message', function(msg) {
 					messages.innerHTML = '';
 					let side = "left-aligned";
 					for(let i in msg) {
@@ -220,14 +220,6 @@
 						}
 					}
 				});
-
-				socket.on('chat message', function(msg) {
-					var el = document.createElement('li');
-					el.innerHTML = '<span>' + msg.nickName + ' <small><i>' + msg.time + '</i></small></span><br><p>' + 
-							msg.text + '</p>';
-					messages.appendChild(el);
-				});
-
 			})();
 		
 		</script>

@@ -27,10 +27,8 @@ io.on('connection', function(socket) {
 	
 	socket.on('chat message', function(msg) {
 		messages.push(msg);
-		io.emit('chat message', msg);
+		io.emit('chat message', messages);
 	});
-
-	socket.emit('chat history', messages);
 });
 
 function checkNickname(msg) {
