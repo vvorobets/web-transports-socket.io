@@ -15,7 +15,7 @@ app.get('/script.js', function(req, res){
 
 io.on('connection', function(socket) {
 	console.log('Client connected');
-	var userInfo;
+	let userInfo;
 
 	socket.on('chat users', function(msg) {
 		userInfo = msg;
@@ -33,15 +33,17 @@ io.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function(msg){
-		console.log("Disconnect!");
-		console.log(userInfo);
 		let n = findIndexOfUser(nickNames, userInfo);
 		if(n>=0){
-console.log(nickNames[n].userName);
-			nickNames[n].userState = 'offline';
+			nickNames[n].userState = 'just left';
+			io.sockets.emit('chat users', nickNames);
 		}
+		setInterval(function(){
+			nickNames[n].userState = 'offline';
+			io.sockets.emit('chat users', nickNames);
+		}, 60000);
 		
-		io.sockets.emit('chat users', nickNames);
+		
 	});
 });
 
