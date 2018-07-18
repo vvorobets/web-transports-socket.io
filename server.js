@@ -25,6 +25,11 @@ io.on('connection', function(socket) {
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
 		}
+		setInterval(function(){
+			let l = nickNames.length;
+			nickNames[(l - 1)].userState = 'online';
+			io.sockets.emit('chat users', nickNames);
+		}, 60000);
 	});
 	
 	socket.on('chat message', function(msg) {
