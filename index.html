@@ -164,7 +164,7 @@
 
 				var socket = io.connect();
 
-					enterButton.addEventListener('click', function(e) {
+				enterButton.addEventListener('click', function(e) {
 					e.preventDefault();
 					userName = uname.value;
 					nickName = nick.value;
@@ -190,8 +190,17 @@
 
 				socket.on('chat users', function(msg) {
 					errMessage.innerText = '';
-		chatEnter.style.display = "none";
-		chat.style.display = "grid";
+					chatEnter.style.display = "none";
+					chat.style.display = "grid";
+
+					usersList.innerHTML = '';
+					if(msg.length > 0) {
+						for(let i in msg) {
+							var el = document.createElement('li');
+							el.innerHTML = '<i>' + msg[i].userName + ' </i><b> @' + msg[i].nickName + '</b>';
+							usersList.appendChild(el);
+						}
+					}
 				});
 				socket.on('exception', function(msg) {
 					errMessage.innerText = "Nickname is already used! Please choose another one."; // JSON.parse(msg).error;

@@ -19,7 +19,7 @@ io.on('connection', function(socket) {
 	socket.on('chat users', function(msg) {
 		if(checkNickname(msg)) {
 			nickNames.push(msg);
-			io.emit('chat users', msg);
+			io.emit('chat users', nickNames);
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
 		}
