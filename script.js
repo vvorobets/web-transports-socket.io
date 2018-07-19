@@ -100,5 +100,6 @@
 				messages.appendChild(el);
 			}
 		}
+		notification.innerText = '';
 	});
 })();
