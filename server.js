@@ -39,7 +39,7 @@ io.on('connection', function(socket) {
 		} else {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
 		}
-		setInterval(function(){
+		setTimeout(function(){
 			if(id>=0) nickNames[id].userState = 'online';
 			io.sockets.emit('chat users', nickNames);
 		}, 60000);
@@ -74,7 +74,7 @@ io.on('connection', function(socket) {
 			nickNames[id].userState = 'just left';
 			io.sockets.emit('chat users', nickNames);
 		
-			setInterval(function(){
+			setTimeout(function(){
 				nickNames[id].userState = 'offline';
 				io.sockets.emit('chat users', nickNames);
 			}, 60000);
