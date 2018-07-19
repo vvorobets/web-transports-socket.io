@@ -40,8 +40,10 @@ io.on('connection', function(socket) {
 			socket.emit('exception', {errorMessage: "Nickname is invalid! Please try again later."});
 		}
 		setTimeout(function(){
-			if(id>=0) nickNames[id].userState = 'online';
-			io.sockets.emit('chat users', nickNames);
+			if((id>=0) && nickNames[id].userState === 'just appeared') {
+				nickNames[id].userState = 'online';
+				io.sockets.emit('chat users', nickNames);
+			}
 		}, 60000);
 	});
 
@@ -75,8 +77,10 @@ io.on('connection', function(socket) {
 			io.sockets.emit('chat users', nickNames);
 		
 			setTimeout(function(){
-				nickNames[id].userState = 'offline';
-				io.sockets.emit('chat users', nickNames);
+				if(nickNames[id].userState === 'just left') {
+					nickNames[id].userState = 'offline';
+					io.sockets.emit('chat users', nickNames);
+				}
 			}, 60000);
 		}
 	});
