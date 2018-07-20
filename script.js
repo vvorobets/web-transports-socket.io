@@ -81,6 +81,7 @@
 
 	socket.on('chat oninput', function(msg) {
 		notification.innerText = msg;
+		notification.style.backgroundColor = '#AAAAAA';
 	});
 
 	socket.on('chat direct', function(msg) {
@@ -101,5 +102,6 @@
 			}
 		}
 		notification.innerText = '';
+		notification.style.backgroundColor = '#AAAAAA';
 	});
 })();

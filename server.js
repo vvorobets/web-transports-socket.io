@@ -49,7 +49,7 @@ io.on('connection', function(socket) {
 
 	socket.on('chat oninput', function(msg){
 		let notation = `@${msg.nickName} is typing …`;
-		io.emit('chat oninput', notation);
+		socket.broadcast.emit('chat oninput', notation);
 		
 		if(Object.is('@', msg.text[0])) {
 			nickNames.forEach(user=>{
